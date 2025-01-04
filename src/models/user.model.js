@@ -1,4 +1,6 @@
-import mongoose, {Schema} from "mongoose"
+import mongoose, {Schema} from "mongoose";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
     {
@@ -53,5 +55,18 @@ const userSchema = new Schema(
     }
 )
 
+userSchema.pre("save", async function (next) {  // password encrypted
+    if (this.isModified("password")) {
+    this.password = brcypt.hash(this.password, 10)
+    next()
+    }
+    else next()
+})
+
+userSchema.methods.isPasswordCorrect = async function(password) {
+   return await bcrypt.compare(password, this.password) // this.password is encrypted one
+}
 
 export const User = mongoose.model("User", userSchema)
+
+// json web token = jwt and bcrypt for password hashing
