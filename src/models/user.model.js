@@ -56,8 +56,8 @@ const userSchema = new Schema(
 )
 
 userSchema.pre("save", async function (next) {  // password encrypted
-    if (this.isModified("password")) {
-    this.password = brcypt.hash(this.password, 10)
+    if (this.isModified("password")) { // have to write password in string cz its syntax
+    this.password = bcrypt.hash(this.password, 10)
     next()
     }
     else next()
