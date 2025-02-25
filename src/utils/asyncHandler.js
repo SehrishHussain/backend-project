@@ -19,3 +19,5 @@ export {asyncHandler}
         
    // }
 // }
+// const asyncHandler = (fn) => () => {}  // its a higher order fn: accepts fn as parameter n returns a fn as well
+// const asyncHandler = (fn) => async() => {}
