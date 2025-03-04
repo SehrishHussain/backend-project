@@ -63,7 +63,7 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 
         const createdUser = await User.findById(user._id).select(
             "-password -refreshToken"
-        )
+        ) // _id is a mongodb gives id to every entry. and the string values are the ones that will be not selected
 
         if (createdUser) {
             throw new ApiError(500, "Something went wrong while registering user")
