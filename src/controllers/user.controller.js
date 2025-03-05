@@ -17,6 +17,8 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 
 
     const {fullName, email, username, password} = req.body;
+    console.log("Request body in asyncHandler", req.body);
+    
 
    // if (fullName === "") {
      //   throw new ApiError(400, 'full name is required')
@@ -38,8 +40,15 @@ import { ApiResponse } from "../utils/ApiResponse.js"
         }
 
         const avatarLocalPath = req.files?.avatar[0]?.path;
-        const coverImageLocalPath = req.files?.coverImage[0]?.path;
+        console.log("req.filessss: ", req.files);
+        
+       // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
+       let coverImageLocalPath;
+       if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+           coverImageLocalPath = req.files.coverImage[0].path
+       }
+       
         if (!avatarLocalPath) {
             throw new ApiError(400, "Avatar file is required")
         }

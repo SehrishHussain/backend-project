@@ -65,3 +65,5 @@ export const Patient = mongoose.model("Patient", patientSchema)
 
 const hospitalSchema = new mongoose.Schema({}, {timestamps:true})
  export const Hospital = mongoose.model("Hospital", hospitalSchema);
+
+
