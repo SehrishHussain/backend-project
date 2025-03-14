@@ -285,5 +285,6 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
     logoutUser,
     refreshAccessToken,
     changeCurrentPassword,
-    getCurrentUser   
+    getCurrentUser,
+    updateAccountDetails   
  }
