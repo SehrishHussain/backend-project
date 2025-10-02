@@ -1,80 +1,254 @@
-# Video streaming platform
-A video streaming platform built using **Express**, **Node.js**, **MongoDB**, and **Cloudinary**.
+# Video Streaming Platform (Backend)
 
-## Tech stack
-- Backend Framework: **Express.js**
-- Runtime Environment: **Node.js**
-- Database: **MongoDB** (NoSQL)
-- Cloud Storage: **Cloudinary** (for media uploads)
+A Node.js + MongoDB backend for a YouTube-like video streaming platform.  
+This backend provides authentication, video uploads, subscriptions, and token-based session management.
 
-# To setup development environment
-Clone the Repository
+---
+
+##  Tech Stack
+- **Runtime:** Node.js, Express.js
+- **Database:** MongoDB + Mongoose ODM
+- **Authentication:** JWT (Access & Refresh Tokens), Cookies
+- **File Handling:** Multer for file uploads
+- **Debugging:** Custom middleware + error handling
+- **Testing API:** Postman
+
+---
+
+##  Features
+- **User Management**
+  - User registration & login with JWT
+  - Access & refresh token handling
+  - Secure cookie-based sessions
+  - Password hashing & Mongoose hooks
+
+- **Video Management**
+  - Upload videos with Multer
+  - Store metadata in MongoDB
+  - Aggregation pipelines for analytics
+  - Sub-pipelines for subscriptions and recommendations
+
+- **Subscriptions**
+  - Subscription schema & controllers
+  - Aggregated subscriber counts
+  - Fetch videos from subscribed channels
+
+- **API Structure**
+  - RESTful routes (HTTP methods: GET, POST, PUT, DELETE)
+  - Controllers for user, video, and subscription logic
+  - Middleware for authentication, error handling, and debugging
+  - Custom API response format for consistency
+
+---
+
+##  Project Structure
 ```
-git clone https://github.com/SehrishHussain/backend-project.git
-cd your-repo
-```
-## Install dependencies
-`npm install`
+src/
+┣ controllers/ # Route handlers (User, Video, Subscription)
+┣ models/ # MongoDB models with Mongoose
+┣ middleware/ # Auth, error handling, debugging
+┣ routes/ # Express routers
+┣ utils/ # Custom helpers (API response, JWT, etc.)
+┗ server.js # App entry point
 
-## Set Up Environment Variables
-```
-PORT=8000
-MONGODB_URI=your_mongodb_connection_string
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-## Start Development Server
-`npm run dev`
+##  Authentication Flow
+- Register/Login → JWT generated
+- **Access Token**: short-lived, stored in cookies
+- **Refresh Token**: long-lived, used to regenerate access token
+- Middleware validates tokens and attaches user info to `req.user`
 
-The backend server will be running at:
+---
 
- http://localhost:8000
+##  Data Models
+- **User Model**
+  - Schema with hooks (password hashing, token generation)
+- **Video Model**
+  - Video metadata, upload path, likes/dislikes
+- **Subscription Model**
+  - Linking subscribers with creators
+- **Tokens**
+  - Access & refresh tokens handled with cookies
 
- ## Project Structure
- ```
- /src
-│── /controllers         # Business logic (User, Video, etc.)
-│── /models              # Mongoose models
-│── /routes              # API endpoints
-│── /middlewares         # Middleware functions (Auth, Multer, etc.)
-│── /utils               # Utility functions (Cloudinary, Helpers, etc.)
-│── server.js            # Main server entry point
-│── .env                 # Environment variables (ignored in Git)
-│── package.json         # Project dependencies
+---
+##  API Endpoints & Examples
 
- 
+###  Auth
+#### Register
+`POST /api/auth/register`
+```json
+// Request
+{
+  "username": "sehrish",
+  "email": "sehrish@example.com",
+  "password": "mypassword123"
+}
+
+// Response
+{
+  "success": true,
+  "message": "User registered successfully",
+  "data": {
+    "id": "64c5b7...",
+    "username": "sehrish",
+    "email": "sehrish@example.com"
+  }
+}
 ```
 
-## File Upload Handling (Cloudinary + Multer)
-- Multer temporarily stores uploaded files in `./public/temp.`
-- Files are then uploaded to **Cloudinary** using the `uploadOnCloudinary()` function.
-- Once uploaded, the local file is **deleted** to save space.
+## Login
+* POST /api/auth/login
 
-## API Endpoints
+```json
+// Request
+{
+  "email": "sehrish@example.com",
+  "password": "mypassword123"
+}
 
-| Method | Route          | Description          |
-|--------|--------------|----------------------|
-| POST   | `/api/register` | Register a new user |
-| POST   | `/api/login`   | User login          |
-| GET    | `/api/videos`  | Fetch all videos    |
-| POST   | `/api/upload`  | Upload a video file |
+// Response (cookies set with tokens)
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI..."
+  }
+}
 
+```
+## Videos
+* POST /api/videos/upload
+* (Form-Data: file → video file, title, description)
 
-## Contributing
+```json
+// Response
+{
+  "success": true,
+  "message": "Video uploaded successfully",
+  "data": {
+    "id": "64c5c1...",
+    "title": "My Travel Vlog",
+    "description": "Trip to Hunza",
+    "fileUrl": "/uploads/1693234-video.mp4",
+    "uploadedBy": "64c5b7..."
+  }
+}
 
-Feel free to submit a pull request if you’d like to contribute! 🚀  
+```
+## Get Video by ID
+* GET /api/videos/:id
 
-### Steps to Contribute:  
+```json
+// Response
+{
+  "success": true,
+  "data": {
+    "id": "64c5c1...",
+    "title": "My Travel Vlog",
+    "views": 102,
+    "likes": 10,
+    "dislikes": 1,
+    "uploadedBy": {
+      "id": "64c5b7...",
+      "username": "sehrish"
+    }
+  }
+}
+```
+## Subscriptions
+* Subscribe to a User
+* POST /api/subscriptions/:channelId
 
-1. **Fork** the repository  
-2. **Create** a new branch:  
-   ```bash
-   git checkout -b feature-branch
-   
-## 🚧 Work in Progress  
+```json
+// Response
+{
+  "success": true,
+  "message": "Subscribed successfully",
+  "data": {
+    "subscriberId": "64c5b7...",
+    "channelId": "64c5b8..."
+  }
+}
 
-This project is still under development, and new features are being added continuously. Stay tuned for updates!  
+```
+## Get Subscribed Videos
+* GET /api/subscriptions/videos
 
-If you have any suggestions or feedback, feel free to open an issue or contribute. 🚀  
+```json
+// Response
+{
+  "success": true,
+  "data": [
+    {
+      "title": "Cooking Show",
+      "channel": "Foodie123",
+      "views": 1500
+    },
+    {
+      "title": "Coding Tutorial",
+      "channel": "DevWorld",
+      "views": 3200
+    }
+  ]
+}
+
+```
+## Token Refresh
+* POST /api/auth/refresh-token
+
+```json
+// Request
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI..."
+}
+
+// Response
+{
+  "success": true,
+  "data": {
+    "accessToken": "new-access-token..."
+  }
+}
+
+```
+##  API Testing
+Used **Postman** collections for:
+- Register/Login
+- Upload video
+- Subscribe/Unsubscribe
+- Token refresh
+- Error scenarios
+
+---
+
+##  Error Handling
+- Centralized error middleware
+- Custom API response format
+- Debugging logs for development
+
+---
+
+## Installation
+```bash
+# Clone repo
+git clone https://github.com/SehrishHussain/misterymessage.git
+cd misterymessage
+
+# Install dependencies
+npm install
+
+# Create .env file
+MONGO_URI=your_mongo_connection
+JWT_SECRET=your_secret
+PORT=5000
+
+# Start server
+npm run dev
+```
+## Future Improvements
+- Add video streaming with chunks
+- Implement comments & likes
+- Improve subscription recommendations
+- Deploy on cloud (Heroku, Render, etc.)
